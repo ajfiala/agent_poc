@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "agent poc",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
