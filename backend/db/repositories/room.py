@@ -44,7 +44,6 @@ class RoomRepository:
         # Convert each SQLAlchemy row to a RoomSchema
         room_schemas = [RoomSchema.model_validate(r) for r in rows]
 
-
         return room_schemas
 
     async def get_room_by_room_id(self, room_id: str) -> RoomSchema:
