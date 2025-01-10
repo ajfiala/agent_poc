@@ -9,7 +9,6 @@ class Room(Base):
     __tablename__ = 'rooms'
 
     room_id = Column(BigInteger, primary_key=True, autoincrement=True)
-    room_number = Column(String(10), nullable=False)
     room_type = Column(String(50), nullable=False)
     rate = Column(Numeric(10, 2), nullable=False)
     available = Column(Boolean, nullable=False)

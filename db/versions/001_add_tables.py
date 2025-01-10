@@ -32,10 +32,10 @@ def upgrade():
     )
 
     # rooms
+    # room_id is the room number
     op.create_table(
         'rooms',
-        sa.Column('room_id', sa.BigInteger(), primary_key=True, autoincrement=True),
-        sa.Column('room_number', sa.String(length=10), nullable=False),
+        sa.Column('room_id', sa.BigInteger(), primary_key=True),
         sa.Column('room_type', sa.String(length=50), nullable=False),
         sa.Column('rate', sa.Numeric(10, 2), nullable=False),
         sa.Column('available', sa.Boolean(), nullable=False),
