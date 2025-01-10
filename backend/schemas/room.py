@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
@@ -10,6 +9,6 @@ class RoomSchema(BaseModel):
     room_number: str
     room_type: str
     rate: float
-    status: str
+    available: bool
     created_at: Optional[datetime]
     updated_at: Optional[datetime]

@@ -52,3 +52,71 @@ async def test_list_rooms_by_type_returns_correct_rooms(async_session: AsyncSess
     assert len(suite_rooms) == 10, "Expected 10 suite rooms to be returned"
     assert isinstance(suite_rooms[0], RoomSchema), "Expected item to be an instance of RoomSchema"
 
+@pytest.mark.asyncio
+async def test_get_room_by_room_number_returns_correct_room(async_session: AsyncSession):
+    """
+    Tests that 'get_room_by_room_number' in 'RoomRepository' returns
+    the correct room from our seeded database.
+    """
+    # Arrange
+    repo = RoomRepository(db=async_session)
+
+    room = await repo.get_room_by_room_number("101")
+
+    # Assert
+    assert room.room_number == "101", "Expected room number to be '101'"
+    assert room.room_type == "single", "Expected room type to be 'single'"
+
+@pytest.mark.asyncio
+async def test_update_room_available_updates_availability_correctly(async_session: AsyncSession):
+    """
+    Tests that 'update_room_available' in 'RoomRepository' correctly updates
+    the available of a room in our seeded database.
+    """
+    # Arrange
+    repo = RoomRepository(db=async_session)
+
+    room = await repo.get_room_by_room_number("101")
+
+    result = await repo.update_room_availability(room_number="101", available=False)
+
+    # Assert
+    assert result is True, "Expected update_room_available to return True"
+
+    updated_room = await repo.get_room_by_room_number("101")
+
+    assert updated_room.available is False, "Expected room availability to be updated to False"
+
+@pytest.mark.asyncio
+async def test_update_unavailable_room_to_available_correctly(async_session: AsyncSession):
+    """
+    Tests that 'update_room_available' in 'RoomRepository' correctly updates
+    the available of a room in our seeded database.
+    """
+    # Arrange
+    repo = RoomRepository(db=async_session)
+
+    room = await repo.get_room_by_room_number("101")
+
+    result = await repo.update_room_availability(room_number="101", available=True)
+
+    # Assert
+    assert result is True, "Expected update_room_available to return True"
+
+    updated_room = await repo.get_room_by_room_number("101")
+
+    assert updated_room.available is True, "Expected room availability to be updated to True"
+
+@pytest.mark.asyncio
+async def test_update_room_available_returns_false_for_nonexistent_room(async_session: AsyncSession):
+    """
+    Tests that 'update_room_available' in 'RoomRepository' returns False
+    when trying to update the availability of a room that does not exist.
+    """
+    # Arrange
+    repo = RoomRepository(db=async_session)
+
+    result = await repo.update_room_availability(room_number="999", available=False)
+
+    # Assert
+    assert result is False, "Expected update_room_available to return False for a nonexistent room"

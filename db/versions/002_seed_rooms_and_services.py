@@ -27,15 +27,15 @@ def upgrade():
         stmt = (
             sa.text(
                 """
-                INSERT INTO rooms (room_number, room_type, rate, status)
-                VALUES (:room_number, :room_type, :rate, :status)
+                INSERT INTO rooms (room_number, room_type, rate, available)
+                VALUES (:room_number, :room_type, :rate, :available)
                 """
             )
             .bindparams(
                 room_number=str(room_num),
                 room_type="single",
                 rate=100.00,
-                status="available",
+                available=True,
             )
         )
         op.execute(stmt)
@@ -45,15 +45,15 @@ def upgrade():
         stmt = (
             sa.text(
                 """
-                INSERT INTO rooms (room_number, room_type, rate, status)
-                VALUES (:room_number, :room_type, :rate, :status)
+                INSERT INTO rooms (room_number, room_type, rate, available)
+                VALUES (:room_number, :room_type, :rate, :available)
                 """
             )
             .bindparams(
                 room_number=str(room_num),
                 room_type="double",
                 rate=200.00,
-                status="available",
+                available=True,
             )
         )
         op.execute(stmt)
@@ -63,15 +63,15 @@ def upgrade():
         stmt = (
             sa.text(
                 """
-                INSERT INTO rooms (room_number, room_type, rate, status)
-                VALUES (:room_number, :room_type, :rate, :status)
+                INSERT INTO rooms (room_number, room_type, rate, available)
+                VALUES (:room_number, :room_type, :rate, :available)
                 """
             )
             .bindparams(
                 room_number=str(room_num),
                 room_type="suite",
                 rate=300.00,
-                status="available",
+                available=True,
             )
         )
         op.execute(stmt)
