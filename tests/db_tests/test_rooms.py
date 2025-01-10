@@ -32,7 +32,6 @@ async def test_list_rooms_by_type_returns_correct_rooms(async_session: AsyncSess
     # Arrange
     repo = RoomRepository(db=async_session)
    
-
     single_rooms = await repo.list_rooms_by_type("single")
 
     double_rooms = await repo.list_rooms_by_type("double")
