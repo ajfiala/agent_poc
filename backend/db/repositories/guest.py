@@ -19,6 +19,19 @@ class GuestRepository:
 
         return guest_schemas
     
+    async def get_guest_by_id(self, guest_id: int) -> GuestSchema:
+        """
+        Fetch a guest by their ID from the database
+        and return it as a GuestSchema.
+        """
+        result = await self.db.execute(select(Guest).where(Guest.guest_id == guest_id))
+        row = result.scalar_one_or_none()
+
+        if row is None:
+            raise ValueError(f"No guest found with id {guest_id}")
+        
+        return GuestSchema.model_validate(row)
+    
     async def get_guest_by_email(self, email: str) -> GuestSchema:
         """
         Fetch a guest by their email from the database

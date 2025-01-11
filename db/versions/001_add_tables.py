@@ -94,6 +94,7 @@ def downgrade():
     op.drop_table('services')
     op.drop_table('reservations')
     op.drop_table('rooms')
-    op.drop_table('guests')
+    op.execute("drop table guests cascade")
+    op.drop_table('sessions')
     op.execute("DROP EXTENSION IF EXISTS citext")
 

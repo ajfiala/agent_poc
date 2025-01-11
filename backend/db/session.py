@@ -27,6 +27,8 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     FastAPI dependency that provides an AsyncSession.
     Yields the session, ensuring that it is closed after use.
     """
+    print(f"Creating new session for request")
+
     async with async_session() as session:
         try:
             yield session
