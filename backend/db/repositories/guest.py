@@ -15,7 +15,6 @@ class GuestRepository:
         result = await self.db.execute(select(Guest))
         rows = result.scalars().all()
 
-        # Convert each SQLAlchemy row to a GuestSchema using .from_orm
         guest_schemas = [GuestSchema.model_validate(r) for r in rows]
 
         return guest_schemas

@@ -15,7 +15,6 @@ class RoomRepository:
         result = await self.db.execute(select(Room))
         rows = result.scalars().all()
 
-        # Convert each SQLAlchemy row to a RoomSchema
         room_schemas = [RoomSchema.model_validate(r) for r in rows]
 
         return room_schemas
@@ -28,7 +27,6 @@ class RoomRepository:
         result = await self.db.execute(select(Room).where(Room.room_type == room_type))
         rows = result.scalars().all()
 
-        # Convert each SQLAlchemy row to a RoomSchema
         room_schemas = [RoomSchema.model_validate(r) for r in rows]
 
         return room_schemas
@@ -41,7 +39,6 @@ class RoomRepository:
         result = await self.db.execute(select(Room).where(Room.room_type == room_type, Room.available == True))
         rows = result.scalars().all()
 
-        # Convert each SQLAlchemy row to a RoomSchema
         room_schemas = [RoomSchema.model_validate(r) for r in rows]
 
         return room_schemas

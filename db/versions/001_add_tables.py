@@ -79,6 +79,15 @@ def upgrade():
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
     )
 
+    # no expiration since this is just a PoC
+    op.create_table(
+        'sessions',
+        sa.Column('session_id', sa.BigInteger(), primary_key=True, autoincrement=True),
+        sa.Column('guest_id', sa.BigInteger(), sa.ForeignKey('guests.guest_id'), nullable=True),
+        sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
+        sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
+    )
+
 
 def downgrade():
     op.drop_table('service_orders')

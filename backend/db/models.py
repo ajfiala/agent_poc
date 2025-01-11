@@ -36,3 +36,10 @@ class Reservation(Base):
     status = Column(String(20), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class Session(Base):
+    __tablename__ = 'sessions'
+    session_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    guest_id = Column(BigInteger, ForeignKey('guests.guest_id'), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
