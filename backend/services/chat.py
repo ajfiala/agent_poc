@@ -40,7 +40,7 @@ class ChatService:
                             " - single, double, and suite. You can help guests create, modify, or cancel reservations."
                             " You can also provide information about existing reservations."
                             "when a user asks to modify a reservation, use the get_reservations tool to see"
-                            " all reservations for that guest, then ask for the reservation_id to modify."],
+                            " all reservations for that guest using the provided guest ID."],
         )
         # Register each reservation method as a tool:
         self._register_tools()
@@ -50,6 +50,10 @@ class ChatService:
         Turn each ReservationService method into a "tool" function.
         The tool must have the signature (RunContext[Deps], <other args>...).
         """
+
+        @self.agent.system_prompt
+        def get_current_user():
+            return self.guest
 
         @self.agent.tool
         async def create_reservation(
@@ -62,6 +66,9 @@ class ChatService:
             """
             Create a new reservation with guest, room_type, check_in, check_out.
             """
+            data =str(ctx)  
+            with open("tool_use.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
             return await self.reservation_service.create_reservation(
                 guest, room_type, check_in, check_out
             )
@@ -74,6 +81,9 @@ class ChatService:
             """
             Get all reservations for a given guest_id.
             """
+            data =str(ctx)
+            with open("tool_use.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
             return await self.reservation_service.get_reservations_for_guest(guest_id)
 
         @self.agent.tool
@@ -87,6 +97,9 @@ class ChatService:
             """
             Modify an existing reservation's check_in, check_out, or room_type.
             """
+            data =str(ctx)
+            with open("tool_use.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
             return await self.reservation_service.modify_reservation(
                 reservation_id, check_in, check_out, room_type
             )
