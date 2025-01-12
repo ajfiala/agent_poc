@@ -11,7 +11,6 @@ class Room(Base):
     room_id = Column(BigInteger, primary_key=True, autoincrement=True)
     room_type = Column(String(50), nullable=False)
     rate = Column(Numeric(10, 2), nullable=False)
-    available = Column(Boolean, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 

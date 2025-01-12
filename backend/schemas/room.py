@@ -9,7 +9,6 @@ class RoomSchema(BaseModel):
     room_id: int
     room_type: Literal["single", "double", "suite"]
     rate: float
-    available: bool
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
 

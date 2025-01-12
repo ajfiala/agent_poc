@@ -69,7 +69,6 @@ async def validate_guest(
     if not guest_id or not email:
         raise InvalidTokenException("Invalid token: missing guest_id/email")
 
-    # fetch from DB
     guest_repo = GuestRepository(db=async_session)
     guest = await guest_repo.get_guest_by_id(guest_id=guest_id)
     

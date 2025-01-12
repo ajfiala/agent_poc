@@ -44,7 +44,9 @@ def downgrade():
     """
     op.execute(
         """
+        DELETE FROM reservations;
+        DELETE FROM messages;
         DELETE FROM sessions
-        WHERE guest_id BETWEEN 1 AND 5
+        WHERE guest_id IN (1, 2, 3, 4, 5);
         """
     )

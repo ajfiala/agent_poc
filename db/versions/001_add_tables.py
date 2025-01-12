@@ -38,7 +38,6 @@ def upgrade():
         sa.Column('room_id', sa.BigInteger(), primary_key=True),
         sa.Column('room_type', sa.String(length=50), nullable=False),
         sa.Column('rate', sa.Numeric(10, 2), nullable=False),
-        sa.Column('available', sa.Boolean(), nullable=False),
         sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
     )
@@ -106,7 +105,7 @@ def downgrade():
     op.drop_table('reservations')
     op.drop_table('rooms')
     op.execute("drop table guests cascade")
-    op.drop_table('sessions')
+    op.execute("drop table sessions cascade")
     op.drop_table('messages')
     op.execute("DROP EXTENSION IF EXISTS citext")
 

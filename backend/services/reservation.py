@@ -52,7 +52,6 @@ class ReservationService:
         except ValueError:
             existing_guest = await self.guest_repo.create_guest(guest)
 
-        # 2) Find an available room
         available_rooms = await self.room_repo.list_available_rooms_by_type(room_type)
         if not available_rooms:
             raise ValueError(f"No available {room_type} rooms for the requested date range.")
@@ -103,7 +102,6 @@ class ReservationService:
                 raise ValueError(f"No available {room_type} rooms for the requested date range.")
             new_room = available_rooms[0]
             new_room_id = new_room.room_id
-            # Note: in a real system, we would also free up the old room but this is only a PoC 
 
         # 2) Update the reservation with new check_in/check_out/room_id
         updated = await self.reservation_repo.update_reservation(

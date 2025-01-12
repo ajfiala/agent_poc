@@ -36,7 +36,7 @@ class RoomRepository:
         Fetch available rooms of a specific type from the database
         and return them as a list of RoomSchema.
         """
-        result = await self.db.execute(select(Room).where(Room.room_type == room_type, Room.available == True))
+        result = await self.db.execute(select(Room).where(Room.room_type == room_type))
         rows = result.scalars().all()
 
         room_schemas = [RoomSchema.model_validate(r) for r in rows]
@@ -55,22 +55,4 @@ class RoomRepository:
             return None
         
         return RoomSchema.model_validate(row)
-    
-    async def update_room_availability(self, room_id: int, available: bool) -> bool:
-        """
-        Update the availability of a room by its room number.
-        """
-        result = await self.db.execute(
-            select(Room).where(Room.room_id == room_id)
-        )
-        row = result.scalar_one_or_none()
-
-        if row is None:
-            return False
-        
-        row.available = available
-        
-        await self.db.commit()
-
-        return True
     
