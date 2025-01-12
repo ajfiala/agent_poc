@@ -25,16 +25,22 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 class ChatService:
-    def __init__(self, db: AsyncSession):
+    def __init__(self, db: AsyncSession, guest_id: int, full_name: str, email: str):
         self.db = db
         self.message_repo = MessageRepository(db=db)
         self.reservation_service = ReservationService(db=db)
-
+        self.guest = GuestSchema(
+            guest_id=guest_id,
+            full_name=full_name,
+            email=email
+        )
         self.agent = Agent(
             "openai:gpt-4o",          
             system_prompt=["you are a hotel AI agent assistant for WhipSplash. WhipSplash offers three types of rooms"
                             " - single, double, and suite. You can help guests create, modify, or cancel reservations."
-                            " You can also provide information about existing reservations."],
+                            " You can also provide information about existing reservations."
+                            "when a user asks to modify a reservation, use the get_reservations tool to see"
+                            " all reservations for that guest, then ask for the reservation_id to modify."],
         )
         # Register each reservation method as a tool:
         self._register_tools()
@@ -47,7 +53,7 @@ class ChatService:
 
         @self.agent.tool
         async def create_reservation(
-            ctx: RunContext,
+            ctx: RunContext[str],
             guest: GuestSchema,
             room_type: str,
             check_in: datetime,
@@ -62,7 +68,7 @@ class ChatService:
 
         @self.agent.tool
         async def get_reservations(
-            ctx: RunContext,
+            ctx: RunContext[str],
             guest_id: int
         ) -> List[ReservationSchema]:
             """
@@ -72,7 +78,7 @@ class ChatService:
 
         @self.agent.tool
         async def modify_reservation(
-            ctx: RunContext,
+            ctx: RunContext[str],
             reservation_id: int,
             check_in: datetime = None,
             check_out: datetime = None,
@@ -87,7 +93,7 @@ class ChatService:
 
         @self.agent.tool
         async def cancel_reservation(
-            ctx: RunContext,
+            ctx: RunContext[str],
             reservation_id: int
         ) -> bool:
             """
@@ -119,10 +125,13 @@ class ChatService:
             ai_resp = ModelResponse(parts=[TextPart(content=pair.ai_message.content)])
             message_history.append(ai_resp)
 
+        print(f"Loaded {len(message_history)} messages from DB")
+        # print(f"messages: {message_history}")
         # 2) run the agent with user prompt
         async with self.agent.run_stream(
             user_prompt=user_content,
             message_history=message_history,
+            deps=self.guest
         ) as result:
 
             final_text = ""
@@ -132,6 +141,12 @@ class ChatService:
                 yield chunk
 
         new_msgs = result.new_messages()
+
+        # write result.all_messages_json() to a file
+        raw_bytes = result.all_messages_json()
+        data = json.loads(raw_bytes)  
+        with open("all_messages.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
 
         if len(new_msgs) == 2:
             user_m = new_msgs[0]

@@ -19,8 +19,10 @@ async def post_chat(
     # hard code for local testing. these will come from the cookies
     session_id = 1
     guest_id = 1
+    full_name = "John Tester"
+    email = "test@email.org"
 
-    chat_service = ChatService(db=db)
+    chat_service = ChatService(db=db, guest_id=guest_id, full_name=full_name, email=email)
 
     # An async generator that yields partial text
     async def streamer():
