@@ -88,6 +88,17 @@ def upgrade():
         sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
     )
 
+    op.create_table(
+        'messages',
+        sa.Column('message_id', sa.BigInteger(), primary_key=True, autoincrement=True),
+        sa.Column('session_id', sa.BigInteger(), sa.ForeignKey('sessions.session_id'), nullable=False),
+        sa.Column('guest_id', sa.BigInteger(), sa.ForeignKey('guests.guest_id'), nullable=False),
+        sa.Column('user_message', sa.Text(), nullable=False),
+        sa.Column('ai_message', sa.Text(), nullable=False),
+        sa.Column('created_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
+        sa.Column('updated_at', sa.TIMESTAMP(timezone=True), server_default=sa.text('NOW()')),
+    )
+
 
 def downgrade():
     op.drop_table('service_orders')
@@ -96,5 +107,6 @@ def downgrade():
     op.drop_table('rooms')
     op.execute("drop table guests cascade")
     op.drop_table('sessions')
+    op.drop_table('messages')
     op.execute("DROP EXTENSION IF EXISTS citext")
 

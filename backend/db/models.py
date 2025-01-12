@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String, Numeric, DateTime, text, Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import CITEXT
+from sqlalchemy.dialects.postgresql import CITEXT, TEXT
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
 
@@ -39,7 +39,20 @@ class Reservation(Base):
 
 class Session(Base):
     __tablename__ = 'sessions'
+    
     session_id = Column(BigInteger, primary_key=True, autoincrement=True)
     guest_id = Column(BigInteger, ForeignKey('guests.guest_id'), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class MessagePair(Base):
+    __tablename__ = 'messages'
+    
+    message_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    session_id = Column(BigInteger, ForeignKey('sessions.session_id'), nullable=False)
+    guest_id = Column(BigInteger, ForeignKey('guests.guest_id'), nullable=False)
+    user_message = Column(TEXT, nullable=False)
+    ai_message = Column(TEXT, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

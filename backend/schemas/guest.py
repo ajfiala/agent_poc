@@ -7,8 +7,8 @@ class GuestSchema(BaseModel):
     full_name: str
     email: EmailStr
     phone: Optional[str] = None
-    created_at: Optional[datetime]
-    updated_at: Optional[datetime]
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

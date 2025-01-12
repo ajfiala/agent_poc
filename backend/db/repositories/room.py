@@ -56,7 +56,7 @@ class RoomRepository:
         
         return RoomSchema.model_validate(row)
     
-    async def update_room_availability(self, room_id: str, available: bool) -> bool:
+    async def update_room_availability(self, room_id: int, available: bool) -> bool:
         """
         Update the availability of a room by its room number.
         """

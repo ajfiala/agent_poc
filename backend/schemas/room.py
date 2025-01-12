@@ -2,11 +2,12 @@ from pydantic import BaseModel
 from typing import Optional
 from enum import Enum
 from datetime import datetime
+from typing import Literal
 
 # models a hotel room 
 class RoomSchema(BaseModel):
     room_id: int
-    room_type: str
+    room_type: Literal["single", "double", "suite"]
     rate: float
     available: bool
     created_at: Optional[datetime]
