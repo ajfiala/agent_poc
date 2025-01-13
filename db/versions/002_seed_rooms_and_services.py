@@ -95,6 +95,26 @@ def upgrade():
             "description": "Arrive well past midnight? We'll hold the room.",
         },
         {
+            "name": "phone use",
+            "price": 19.99,
+            "description": "limited phone use for calling one of the allowed phone numbers (see desk for more information)"
+        },
+        {
+            "name": "unstained towel",
+            "price": 9.99,
+            "description": "towel stolen from the hotel across the street"
+        },
+        {
+            "name": "supervised visit",
+            "price": 49.99,
+            "description": "A staff member will observe you while you speak with a chosen guest for no more than 20 minutes.",
+        },
+        {
+            "name": "tour in local waste treatment facility",
+            "price": 99.99,
+            "description": "A guided tour of the local waste treatment facility, including a complimentary gas mask.",
+        },
+        {
             "name": "hot water",
             "price": 212.99,
             "description": "Limited access to hot water. You will be assigned a two-hour window for hot water use.",

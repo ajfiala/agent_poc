@@ -9,12 +9,17 @@ dependencies = [
     "alembic>=1.14.0",
     "pydantic-ai[logfire]>=0.0.18",
     "psycopg2-binary==2.9.10",
-    "pydantic>=2.10.4",
+    "pydantic[email]>=2.10.4",
     "python-dotenv>=1.0.1",
     "sqlalchemy[asyncio,asyncpg]>=2.0.36",
     "pytest-asyncio>=0.25.2",
     "asyncpg>=0.30.0",
+    "psycopg2>=2.9.10",
+    "fastapi>=0.115.6",
+    "pyjwt>=2.10.1",
+    "uvicorn>=0.34.0",
 ]
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
