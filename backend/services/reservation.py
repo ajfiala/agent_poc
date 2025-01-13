@@ -48,7 +48,7 @@ class ReservationService:
         """
 
         try:
-            existing_guest = await self.guest_repo.get_guest_by_email(guest.email)
+            existing_guest = await self.guest_repo.get_guest_by_id(guest.guest_id)
         except ValueError:
             existing_guest = await self.guest_repo.create_guest(guest)
 

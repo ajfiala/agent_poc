@@ -36,11 +36,7 @@ class ChatService:
         )
         self.agent = Agent(
             "openai:gpt-4o",          
-            system_prompt=["you are a hotel AI agent assistant for WhipSplash. WhipSplash offers three types of rooms"
-                            " - single, double, and suite. You can help guests create, modify, or cancel reservations."
-                            " You can also provide information about existing reservations."
-                            "when a user asks to modify a reservation, use the get_reservations tool to see"
-                            " all reservations for that guest using the provided guest ID."],
+            
         )
         # Register each reservation method as a tool:
         self._register_tools()
@@ -53,11 +49,22 @@ class ChatService:
 
         @self.agent.system_prompt
         def get_current_user():
-            return self.guest
+            system_prompt = f"""
+            "You are a hotel AI agent assistant for WhipSplash. WhipSplash offers three types of rooms"
+            " - single, double, and suite. You can help guests create, modify, or cancel reservations."
+            " You can also provide information about existing reservations."
+            "When a user asks to modify a reservation, use the get_reservations tool to see"
+            " all reservations for that guest using the provided guest ID. The current guest whom"
+            " When users ask for a list of current reservations, use the get_reservations tool to see"
+            " all reservations for that guest using the provided guest ID. Don't rely on message history for this."
+            " The state for reservations is in the database. the message history isn't as reliable for this. "
+            " you are assisting is: {self.guest}."
+            """
+            return system_prompt
 
         @self.agent.tool
         async def create_reservation(
-            ctx: RunContext[str],
+            ctx: RunContext[GuestSchema],
             guest: GuestSchema,
             room_type: str,
             check_in: datetime,
@@ -65,8 +72,17 @@ class ChatService:
         ) -> ReservationSchema:
             """
             Create a new reservation with guest, room_type, check_in, check_out.
+            You are to use the guest provided in the RunContext.
+            This tool calls this method:
+            (method) def create_reservation(
+                guest: GuestSchema,
+                room_type: str,
+                check_in: datetime,
+                check_out: datetime
+            ) -> Coroutine[Any, Any, ReservationSchema]
+            Creates a new reservation for a given guest, room type, and date range, returning a ReservationSchema.
             """
-            data =str(ctx)  
+            data = str(ctx)  
             with open("tool_use.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
             return await self.reservation_service.create_reservation(
@@ -79,7 +95,8 @@ class ChatService:
             guest_id: int
         ) -> List[ReservationSchema]:
             """
-            Get all reservations for a given guest_id.
+            Get all reservations for a given guest_id. The function this tool calls is def get_reservations_for_guest(guest_id: int).
+            It returns all reservations for the specified guest ID.
             """
             data =str(ctx)
             with open("tool_use.json", "w", encoding="utf-8") as f:
@@ -96,6 +113,14 @@ class ChatService:
         ) -> ReservationSchema:
             """
             Modify an existing reservation's check_in, check_out, or room_type.
+            This tool uses this method: (method) def modify_reservation(
+                reservation_id: int,
+                check_in: datetime | None = None,
+                check_out: datetime | None = None,
+                room_type: str | None = None
+            ) -> Coroutine[Any, Any, ReservationSchema]
+            here's the docstring: 
+            Modify an existing reservation, allowing new check_in, check_out, or room_type.
             """
             data =str(ctx)
             with open("tool_use.json", "w", encoding="utf-8") as f:
@@ -111,6 +136,8 @@ class ChatService:
         ) -> bool:
             """
             Cancel an existing reservation by its reservation_id.
+            Here's the method this tool calls: (method) def cancel_reservation(reservation_id: int) -> Coroutine[Any, Any, bool]
+            Cancels (deletes) an existing reservation from the database. Returns True if successful.
             """
             return await self.reservation_service.cancel_reservation(reservation_id)
 
@@ -165,7 +192,6 @@ class ChatService:
             user_m = new_msgs[0]
             ai_m = new_msgs[1]
 
-      
             # Convert so we can store in DB
             user_schema = MessageSchema(content=user_m.parts[0].content, role="user")
             ai_schema = MessageSchema(content=ai_m.parts[0].content, role="assistant")
