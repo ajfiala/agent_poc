@@ -50,7 +50,7 @@ class ReservationService:
         try:
             existing_guest = await self.guest_repo.get_guest_by_id(guest.guest_id)
         except ValueError:
-            existing_guest = await self.guest_repo.create_guest(guest)
+            raise ValueError(f"Guest with id={guest.guest_id} not found. Please create the guest first.")
 
         available_rooms = await self.room_repo.list_available_rooms_by_type(room_type)
         if not available_rooms:
@@ -120,6 +120,8 @@ class ReservationService:
         Returns True if successful.
         """
         res = await self.reservation_repo.delete_reservation(reservation_id)
+
+        print(f"\n\nReservation with id={reservation_id} was cancelled successfully.\n\n")
 
         if not res:
             raise ValueError(f"Reservation with id={reservation_id} not found")

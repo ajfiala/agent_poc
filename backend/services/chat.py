@@ -34,6 +34,7 @@ class ChatService:
             full_name=full_name,
             email=email
         )
+        self.reservations = List[ReservationSchema]
         self.agent = Agent(
             "openai:gpt-4o",          
             
@@ -58,14 +59,13 @@ class ChatService:
             " When users ask for a list of current reservations, use the get_reservations tool to see"
             " all reservations for that guest using the provided guest ID. Don't rely on message history for this."
             " The state for reservations is in the database. the message history isn't as reliable for this. "
-            " you are assisting is: {self.guest}."
+            " The guest you are assisting is: {self.guest}."
             """
             return system_prompt
 
         @self.agent.tool
         async def create_reservation(
             ctx: RunContext[GuestSchema],
-            guest: GuestSchema,
             room_type: str,
             check_in: datetime,
             check_out: datetime
@@ -86,13 +86,12 @@ class ChatService:
             with open("tool_use.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
             return await self.reservation_service.create_reservation(
-                guest, room_type, check_in, check_out
+                self.guest, room_type, check_in, check_out
             )
 
         @self.agent.tool
         async def get_reservations(
-            ctx: RunContext[str],
-            guest_id: int
+            ctx: RunContext[GuestSchema]
         ) -> List[ReservationSchema]:
             """
             Get all reservations for a given guest_id. The function this tool calls is def get_reservations_for_guest(guest_id: int).
@@ -101,11 +100,13 @@ class ChatService:
             data =str(ctx)
             with open("tool_use.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
-            return await self.reservation_service.get_reservations_for_guest(guest_id)
+            reservations = await self.reservation_service.get_reservations_for_guest(self.guest.guest_id)
+            self.reservations = reservations
+            return reservations
 
         @self.agent.tool
         async def modify_reservation(
-            ctx: RunContext[str],
+            ctx: RunContext[GuestSchema],
             reservation_id: int,
             check_in: datetime = None,
             check_out: datetime = None,
@@ -131,10 +132,10 @@ class ChatService:
 
         @self.agent.tool
         async def cancel_reservation(
-            ctx: RunContext[str],
+            ctx: RunContext[GuestSchema],
             reservation_id: int
         ) -> bool:
-            """
+            f"""
             Cancel an existing reservation by its reservation_id.
             Here's the method this tool calls: (method) def cancel_reservation(reservation_id: int) -> Coroutine[Any, Any, bool]
             Cancels (deletes) an existing reservation from the database. Returns True if successful.
@@ -171,7 +172,7 @@ class ChatService:
         async with self.agent.run_stream(
             user_prompt=user_content,
             message_history=message_history,
-            deps=self.guest
+            deps=[self.guest, self.reservations]
         ) as result:
 
             final_text = ""

@@ -18,8 +18,7 @@ async_session = sessionmaker(
     bind=engine,
     class_=AsyncSession,
     expire_on_commit=False,
-    autoflush=False,
-    autocommit=False
+    autoflush=True,
 )
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:

@@ -95,9 +95,13 @@ class ReservationRepository:
         row = result.scalars().first()
 
         if not row:
+            print(f"Reservation with id={reservation_id} not found")
             return False
 
+        print(f"\n\nrow: {ReservationSchema.model_validate(row)}\n\n")
+
         self.db.delete(row)
+
         await self.db.commit()
 
         return True
