@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import useChat from "./lib/store";
 import { useShallow } from "zustand/react/shallow";
+import ChatMessage from "./components/chat/ChatMessage";
 
 // Main App component
 export default function App() {
