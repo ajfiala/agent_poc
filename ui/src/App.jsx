@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import useChat from "./lib/store";
 import { useShallow } from "zustand/react/shallow";
 import ChatMessage from "./components/chat/ChatMessage";
+import "./App.css";
 
 // Main App component
 export default function App() {
@@ -27,7 +28,7 @@ export default function App() {
 
   return (
     <div className="relative min-h-screen min-w-screen bg-background">
-      <main className="flex w-full flex-col px-2">
+      <main className="chat-content flex w-full flex-col px-2 overflow-scroll">
         <div
           ref={chatContainerRef}
           className="w-full lg:w-[800px] mx-auto py-12 rounded-2xl sm:mt-12 flex flex-col gap-y-4"
