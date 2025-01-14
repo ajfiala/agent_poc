@@ -1,5 +1,3 @@
-# backend/services/chat.py
-
 import asyncio
 import json
 import logging
@@ -47,6 +45,8 @@ class ChatService:
 
         self.agent = Agent(
             "openai:gpt-4o",
+            end_strategy="exhaustive",
+            retries=2
         )
 
         self._register_tools()
@@ -68,6 +68,7 @@ class ChatService:
             "You are a hotel AI agent assistant for WhipSplash. WhipSplash offers three types of rooms"
             " - single, double, and suite. You can help guests create, modify, or cancel reservations,"
             " and add service orders to their reservations, such as: {self.available_services}."
+            " all services in the available_services list are available for guests to order."
             " The guest you are assisting is: {self.guest}."
             " Use the get_reservations tool to see all reservations for that guest."
             " We do not rely solely on message history for reservation data."
@@ -181,7 +182,7 @@ class ChatService:
                 reservation_id=reservation_id,
                 service_id=service_id,
                 quantity=quantity,
-                status=status
+                status="pending"
             )
 
         @self.agent.tool
@@ -255,10 +256,16 @@ class ChatService:
 
             final_text = ""
 
-            # Stream chunks back to the UI or caller
-            async for chunk in result.stream_text(delta=False, debounce_by=0.01):
-                final_text += chunk
-                yield chunk
+            # try to deal with weird choice chunk delta error
+            if result.is_structured:
+                async for structured_message in result.stream_structured(debounce_by=0.01):
+                    final_text += "Received function call"
+                    yield "Received function call"  # or do something more robust
+            else:
+                # Just text streaming
+                async for text_chunk in result.stream_text(delta=False, debounce_by=0.01):
+                    final_text += text_chunk
+                    yield text_chunk
 
         # The conversation is done; gather new messages from the result
         new_msgs = result.new_messages()
