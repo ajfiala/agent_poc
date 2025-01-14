@@ -152,7 +152,7 @@ class ChatService:
             ctx: RunContext[GuestSchema]
         ) -> List[ServiceSchema]:
             """
-            List all available hotel services 
+            List all available hotel services. Be sure to list the names of the services for the user.
             Calls: ServiceOrderService.list_all_services()
             """
             data = str(ctx)
