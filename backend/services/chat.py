@@ -46,7 +46,10 @@ class ChatService:
         self.agent = Agent(
             "openai:gpt-4o",
             end_strategy="exhaustive",
-            retries=2
+            retries=2,
+            model_settings={
+                "parallel_tool_calls": False  
+            }
         )
 
         self._register_tools()

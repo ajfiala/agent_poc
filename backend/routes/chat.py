@@ -1,4 +1,3 @@
-# backend/routes/chat.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
