@@ -36,6 +36,27 @@ class Reservation(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+class Service(Base):
+    __tablename__ = 'services'
+    
+    service_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    description = Column(TEXT, nullable=True)
+    price = Column(Numeric(10, 2), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class ServiceOrders(Base):
+    __tablename__ = 'service_orders'
+    
+    order_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    reservation_id = Column(BigInteger, ForeignKey('reservations.reservation_id'), nullable=False)
+    service_id = Column(BigInteger, ForeignKey('services.service_id'), nullable=False)
+    quantity = Column(BigInteger, nullable=False, server_default='1')
+    status = Column(String(20), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
 class Session(Base):
     __tablename__ = 'sessions'
     
