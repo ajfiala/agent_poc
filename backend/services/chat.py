@@ -262,8 +262,8 @@ class ChatService:
         print(f"Loaded {len(message_history)} messages from DB")
         if not self.available_services:
             self.available_services = await self.service_order_service.list_all_services()
-        if not self.reservations:
-            self.reservations = await self.reservation_service.get_reservations_for_guest(self.guest.guest_id)
+        
+        self.reservations = await self.reservation_service.get_reservations_for_guest(self.guest.guest_id)
 
         improved_prompt = f"""
         <system prompt>
