@@ -25,10 +25,6 @@ from backend.schemas.reservation import ReservationSchema
 from backend.services.reservation import ReservationService
 from backend.services.service_orders import ServiceOrderService
 
-
-# (Optional) import your new tools from a separate file
-# from backend.services.tools_service_orders import register_service_order_tools
-
 logger = logging.getLogger(__name__)
 load_dotenv()
 
@@ -36,13 +32,8 @@ class ChatService:
     def __init__(self, db: AsyncSession, guest_id: int, full_name: str, email: str):
         self.db = db
         self.message_repo = MessageRepository(db=db)
-
-        # Reservation service
         self.reservation_service = ReservationService(db=db)
-
-        # ServiceOrder service
         self.service_order_service = ServiceOrderService(db=db)
-
         self.available_services = Literal["1. room service", "2. room service with hot meal", "3. wake up call",
                                            "4. late check in", "5. hot water", "6. electricity",
                   "7. tour in local waste treatment facility", "8. unstained towel", "9. supervised visit", "10. phone use"]
@@ -52,15 +43,12 @@ class ChatService:
             full_name=full_name,
             email=email
         )
-        self.reservations = List[ReservationSchema]  # Will store in-memory “cache” for reservations
+        self.reservations = List[ReservationSchema]
 
-        # Create the pydantic-ai Agent
         self.agent = Agent(
             "openai:gpt-4o",
-            # You can specify other settings or prompts if needed
         )
 
-        # Register the tool methods
         self._register_tools()
 
     def _register_tools(self):
@@ -75,7 +63,7 @@ class ChatService:
 
         @self.agent.system_prompt
         def get_current_user():
-            # The system_prompt is a special method to provide system-level instructions
+
             system_prompt = f"""
             "You are a hotel AI agent assistant for WhipSplash. WhipSplash offers three types of rooms"
             " - single, double, and suite. You can help guests create, modify, or cancel reservations,"
@@ -246,20 +234,19 @@ class ChatService:
         4) On completion, store new user+AI messages in the DB
         """
 
-        # 1) Build message history from DB
+
         prior_pairs = await self.message_repo.get_messages_by_session_id(session_id)
         message_history = []
         for pair in prior_pairs:
-            # user request
+    
             user_req = ModelRequest(parts=[UserPromptPart(content=pair.user_message.content)])
             message_history.append(user_req)
-            # AI response
+ 
             ai_resp = ModelResponse(parts=[TextPart(content=pair.ai_message.content)])
             message_history.append(ai_resp)
 
         print(f"Loaded {len(message_history)} messages from DB")
 
-        # 2) run the agent with user prompt
         async with self.agent.run_stream(
             user_prompt=user_content,
             message_history=message_history,
@@ -287,7 +274,6 @@ class ChatService:
             user_m = new_msgs[0]
             ai_m = new_msgs[1]
 
-            # Convert so we can store in DB
             user_schema = MessageSchema(content=user_m.parts[0].content, role="user")
             ai_schema = MessageSchema(content=ai_m.parts[0].content, role="assistant")
 
