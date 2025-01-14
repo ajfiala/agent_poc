@@ -44,6 +44,7 @@ def downgrade():
     """
     op.execute(
         """
+        DELETE FROM service_orders;
         DELETE FROM reservations;
         DELETE FROM messages;
         DELETE FROM sessions

@@ -32,16 +32,14 @@ class ChatService:
         self.message_repo = MessageRepository(db=db)
         self.reservation_service = ReservationService(db=db)
         self.service_order_service = ServiceOrderService(db=db)
-        self.available_services = Literal["1. room service", "2. room service with hot meal", "3. wake up call",
-                                           "4. late check in", "5. hot water", "6. electricity",
-                  "7. tour in local waste treatment facility", "8. unstained towel", "9. supervised visit", "10. phone use"]
+        self.available_services: List[ServiceSchema] = []
 
         self.guest = GuestSchema(
             guest_id=guest_id,
             full_name=full_name,
             email=email
         )
-        self.reservations = List[ReservationSchema]
+        self.reservations: List[ReservationSchema] = []
 
         self.agent = Agent(
             "openai:gpt-4o",
@@ -65,7 +63,13 @@ class ChatService:
         ####################
 
         @self.agent.system_prompt
-        def get_current_user():
+        async def get_current_user():
+
+            if len(self.available_services) == 0 :
+                self.available_services = await self.service_order_service.list_all_services()
+            
+            if len(self.reservations) == 0:
+                self.reservations = await self.reservation_service.get_reservations_for_guest(self.guest.guest_id)
 
             system_prompt = f"""
             "You are a hotel AI agent assistant for WhipSplash. WhipSplash offers three types of rooms"
@@ -96,9 +100,12 @@ class ChatService:
             with open("tool_use.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
-            return await self.reservation_service.create_reservation(
+            new_reservation = await self.reservation_service.create_reservation(
                 self.guest, room_type, check_in, check_out
             )
+            self.reservations = await self.reservation_service.get_reservations_for_guest(self.guest.guest_id)
+
+            return new_reservation
 
         @self.agent.tool
         async def get_reservations(
@@ -132,9 +139,12 @@ class ChatService:
             with open("tool_use.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
-            return await self.reservation_service.modify_reservation(
+            modified_reservation = await self.reservation_service.modify_reservation(
                 reservation_id, check_in, check_out, room_type
             )
+            self.reservations = await self.reservation_service.get_reservations_for_guest(self.guest.guest_id)
+
+            return modified_reservation
 
         @self.agent.tool
         async def cancel_reservation(
@@ -250,9 +260,23 @@ class ChatService:
             message_history.append(ai_resp)
 
         print(f"Loaded {len(message_history)} messages from DB")
+        if not self.available_services:
+            self.available_services = await self.service_order_service.list_all_services()
+        if not self.reservations:
+            self.reservations = await self.reservation_service.get_reservations_for_guest(self.guest.guest_id)
+
+        improved_prompt = f"""
+        <system prompt>
+        these services are available for guests to choose:
+        {self.available_services}
+        this guest currently has these reservations:
+        {self.reservations}
+        <user prompt>
+        {user_content}
+        """
 
         async with self.agent.run_stream(
-            user_prompt=user_content,
+            user_prompt=improved_prompt,
             message_history=message_history,
             deps=[self.guest, self.reservations]
         ) as result:
