@@ -13,7 +13,9 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 
-from backend.routes.chat import router as chat_router  # <-- import your chat router
+from backend.routes.chat import router as chat_router  
+from backend.routes.reservations import router as reservations_router 
+from backend.routes.service_orders import router as service_orders_router 
 
 # logger = SetupLogging()
 
@@ -40,7 +42,6 @@ def create_app() -> FastAPI:
     #     if origin.strip()
     # ]
 
-    # 3) Build middleware
     middleware = [
         Middleware(
             CORSMiddleware,
@@ -52,7 +53,6 @@ def create_app() -> FastAPI:
         )
     ]
 
-    # 4) Create the FastAPI app
     app = FastAPI(
         title="agent poc api",
         version="1.0.0",
@@ -62,8 +62,9 @@ def create_app() -> FastAPI:
         middleware=middleware
     )
 
-    # 7) Include your chat router so `/chat` route works
     app.include_router(chat_router)
+    app.include_router(reservations_router)
+    app.include_router(service_orders_router)
 
     # 10) Minimal 400 handler for pydantic validation
     @app.exception_handler(RequestValidationError)

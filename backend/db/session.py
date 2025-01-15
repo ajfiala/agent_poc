@@ -2,6 +2,7 @@ import os
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.pool import NullPool
 from sqlalchemy.orm import sessionmaker
 from fastapi import Depends
 
@@ -9,16 +10,10 @@ DATABASE_URL = os.getenv("POSTGRES_CONNECTION_STRING", "postgresql+asyncpg://myu
 
 engine = create_async_engine(
     DATABASE_URL,
-    echo=False,         
-    pool_size=5,       
-    max_overflow=10
-)
-
-async_session = sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=True,
-    autoflush=False,
+    echo=False,  
+    future=True      
+    # pool_size=5,       
+    # max_overflow=10
 )
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
@@ -28,6 +23,12 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """
     print(f"Creating new session for request")
 
+    async_session = sessionmaker(
+        bind=engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+        autoflush=False,
+    )
     async with async_session() as session:
         try:
             yield session
