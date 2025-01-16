@@ -35,7 +35,7 @@ export default function App() {
                         <ChatMessage key={index} message={msg.text} isUser={msg.isUser} />
                     ))}
                     {isThinking && (
-                        <Thinking className="text-[#ea02e9] h-[30px] -mt-16 ml-8"/>
+                        <Thinking className="text-[#ea02e9] h-[30px] -mt-16 ml-9"/>
                     )}
                 </div>
 
