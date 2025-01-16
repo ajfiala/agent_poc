@@ -43,3 +43,5 @@ ui/node_modules/
 dist/
 build/
 public/build/
+
+all_messages.json
